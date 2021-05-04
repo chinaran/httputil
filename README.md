@@ -1,6 +1,10 @@
 # httputil
 http util for restful request: get, post, put, patch, delete
 
+## Req/Resp Data
+
+request and response data support: `string, []byte, map, struct`
+
 ## Options (WithFunc)
 
 http request options
