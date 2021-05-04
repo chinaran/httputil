@@ -116,7 +116,7 @@ func TestHttpRequest(t *testing.T) {
 				WithHeader(map[string]string{
 					"Accept":       "application/json",
 					"Content-Type": "application/json;charset=UTF-8",
-				}))
+				}), WithStatusCodeJudge(defaultCodeJudger))
 			if tt.wantErr {
 				t.Logf("err: %+v\n", err)
 				code, ok := GetErrorCode(err)

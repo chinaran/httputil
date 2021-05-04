@@ -59,6 +59,9 @@ func IsErrorCode(err error, code int) bool {
 // PrintfFunc for print request log
 type PrintfFunc func(format string, v ...interface{})
 
+// StatusCodeJudgeFunc for judge status code (right status code return true)
+type StatusCodeJudgeFunc func(statusCode int) bool
+
 // MarshalFunc marshal request function
 type MarshalFunc func(v interface{}) ([]byte, error)
 
@@ -74,6 +77,7 @@ type reqOptions struct {
 	unmarshaler UnmarshalFunc
 	logTimeCost bool
 	printfer    PrintfFunc
+	codeJudger  StatusCodeJudgeFunc
 }
 
 // ReqOptionFunc request option function
@@ -148,6 +152,25 @@ func WithLogTimeCost(printfer ...PrintfFunc) ReqOptionFunc {
 	}
 }
 
+// WithStatusCodeJudge default: defaultCodeJudger
+func WithStatusCodeJudge(codeJudger StatusCodeJudgeFunc) ReqOptionFunc {
+	return func(opt *reqOptions) error {
+		if opt == nil || codeJudger == nil {
+			return nil
+		}
+		opt.codeJudger = codeJudger
+		return nil
+	}
+}
+
+// default StatusCodeJudgeFunc
+func defaultCodeJudger(statusCode int) bool {
+	if statusCode < 200 || statusCode >= 300 {
+		return false
+	}
+	return true
+}
+
 // default option for each request
 var defaultReqOption = reqOptions{
 	httpClient: &http.Client{},
@@ -160,6 +183,7 @@ var defaultReqOption = reqOptions{
 	unmarshaler: json.Unmarshal,
 	logTimeCost: false,
 	printfer:    logger.Printf,
+	codeJudger:  defaultCodeJudger,
 }
 
 // Get http request
@@ -254,7 +278,7 @@ func httpRequest(ctx context.Context, method, url string, req, resp interface{},
 		return err
 	}
 	statusCode = response.StatusCode
-	if statusCode < 200 || statusCode >= 300 {
+	if !opt.codeJudger(statusCode) {
 		return NewRequestError(statusCode, string(respData))
 	}
 	if resp != nil {
