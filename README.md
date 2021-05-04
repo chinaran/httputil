@@ -1,6 +1,51 @@
 # httputil
 http util for restful request: get, post, put, patch, delete
 
+## Options (WithFunc)
+
+http request options
+
+### WithClient
+
+default: &http.Client{}
+
+example: client with https
+
+```golang
+tr := &http.Transport{
+	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+}
+client := &http.Client{Transport: tr}
+```
+
+### WithTimeout
+
+default: 30 * time.Second
+
+### WithHeader
+
+default: "Accept": "application/json", "Content-Type": "application/json;charset=UTF-8"
+
+### WithMarshal
+
+default: json.Marshal
+
+### WithUnmarshal
+
+default: json.Unmarshal
+
+### WithLogTimeCost
+
+default: donot log request time cost, using logger.Printf
+
+log style: gin
+
+example: `INFO 2021/05/04 12:24:04 REQUEST | 200 |  305.549239ms | GET     https://httpbin.org/get?hello=world`
+
+### WithStatusCodeJudge
+
+default: defaultCodeJudger (2xx is the right status code)
+
 ## Usage
 
 ```golang
