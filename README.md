@@ -7,7 +7,7 @@ http request options
 
 ### WithClient
 
-default: &http.Client{}
+default: `&http.Client{}`
 
 example: client with https
 
@@ -20,19 +20,19 @@ client := &http.Client{Transport: tr}
 
 ### WithTimeout
 
-default: 30 * time.Second
+default: `30 * time.Second`
 
 ### WithHeader
 
-default: "Accept": "application/json", "Content-Type": "application/json;charset=UTF-8"
+default: `"Accept": "application/json", "Content-Type": "application/json;charset=UTF-8"`
 
 ### WithMarshal
 
-default: json.Marshal
+default: `json.Marshal`
 
 ### WithUnmarshal
 
-default: json.Unmarshal
+default: `json.Unmarshal`
 
 ### WithLogTimeCost
 
@@ -44,7 +44,7 @@ example: `INFO 2021/05/04 12:24:04 REQUEST | 200 |  305.549239ms | GET     https
 
 ### WithStatusCodeJudge
 
-default: defaultCodeJudger (2xx is the right status code)
+default: `defaultCodeJudger` (2xx is the right status code)
 
 ## Usage
 
