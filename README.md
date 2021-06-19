@@ -92,6 +92,6 @@ func main() {
 		log.Printf("Post %s err: %s", urlGet, err)
 		return
 	}
-	log.Printf("Post %s struct response: %+v", urlGet, respPost)
+	log.Printf("Post %s struct response: %+v", urlPost, respPost)
 }
 ```
