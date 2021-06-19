@@ -89,7 +89,7 @@ func main() {
 		Data string `json:"data"`
 	}{}
 	if err := hu.Post(context.TODO(), urlPost, &req, &respPost, hu.WithLogTimeCost()); err != nil {
-		log.Printf("Post %s err: %s", urlGet, err)
+		log.Printf("Post %s err: %s", urlPost, err)
 		return
 	}
 	log.Printf("Post %s struct response: %+v", urlPost, respPost)
