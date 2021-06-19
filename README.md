@@ -1,6 +1,10 @@
 # httputil
 http util for restful request: get, post, put, patch, delete
 
+## Usage
+
+`go get -u github.com/chinaran/httputil`
+
 ## Req/Resp Data
 
 request and response data support: `string, []byte, map, struct`
@@ -50,7 +54,7 @@ example: `INFO 2021/05/04 12:24:04 REQUEST | 200 |  305.549239ms | GET     https
 
 default: `defaultCodeJudger` (2xx is the right status code)
 
-## Usage
+## Example
 
 ```golang
 package main
