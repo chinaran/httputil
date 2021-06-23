@@ -95,3 +95,7 @@ func main() {
 	log.Printf("Post %s struct response: %+v", urlPost, respPost)
 }
 ```
+
+result:
+
+![result](https://github.com/chinaran/my-pictures/blob/master/httputil/result.png)
