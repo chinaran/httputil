@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 )
@@ -78,6 +79,7 @@ type reqOptions struct {
 	logTimeCost bool
 	printfer    PrintfFunc
 	codeJudger  StatusCodeJudgeFunc
+	statusCode  *int
 }
 
 // ReqOptionFunc request option function
@@ -171,6 +173,17 @@ func defaultCodeJudger(statusCode int) bool {
 	return true
 }
 
+// StoreStatusCode default: not store, just judge
+func StoreStatusCode(statusCode *int) ReqOptionFunc {
+	return func(opt *reqOptions) error {
+		if opt == nil {
+			return nil
+		}
+		opt.statusCode = statusCode
+		return nil
+	}
+}
+
 // default option for each request
 var defaultReqOption = reqOptions{
 	httpClient: &http.Client{},
@@ -184,6 +197,7 @@ var defaultReqOption = reqOptions{
 	logTimeCost: false,
 	printfer:    logger.Printf,
 	codeJudger:  defaultCodeJudger,
+	statusCode:  new(int),
 }
 
 // Get http request
@@ -218,15 +232,18 @@ func requestLog(printfer PrintfFunc, statusCode int, cost time.Duration, method,
 
 // http request
 // req, resp are point type
-func httpRequest(ctx context.Context, method, url string, req, resp interface{}, opts ...ReqOptionFunc) error {
-	if url == "" {
-		return errors.New("bad request url")
+func httpRequest(ctx context.Context, method, addr string, req, resp interface{}, opts ...ReqOptionFunc) error {
+	u, err := url.Parse(addr)
+	if err != nil {
+		return fmt.Errorf("bad request url: s%s", err)
 	}
+	if u.Scheme == "" {
+		u.Scheme = "http"
+	}
+
 	var (
-		opt        = defaultReqOption
-		statusCode = 0
-		reqBody    io.Reader
-		err        error
+		opt     = defaultReqOption
+		reqBody io.Reader
 	)
 	for _, optFunc := range opts {
 		if err := optFunc(&opt); err != nil {
@@ -236,7 +253,7 @@ func httpRequest(ctx context.Context, method, url string, req, resp interface{},
 
 	if opt.logTimeCost {
 		start := time.Now()
-		defer func() { requestLog(opt.printfer, statusCode, time.Since(start), method, url) }()
+		defer func() { requestLog(opt.printfer, *opt.statusCode, time.Since(start), method, addr) }()
 	}
 
 	if req != nil {
@@ -254,7 +271,7 @@ func httpRequest(ctx context.Context, method, url string, req, resp interface{},
 		reqBody = bytes.NewReader(reqData)
 	}
 
-	request, err := http.NewRequest(method, url, reqBody)
+	request, err := http.NewRequest(method, u.String(), reqBody)
 	if err != nil {
 		return err
 	}
@@ -277,9 +294,9 @@ func httpRequest(ctx context.Context, method, url string, req, resp interface{},
 	if err != nil {
 		return err
 	}
-	statusCode = response.StatusCode
-	if !opt.codeJudger(statusCode) {
-		return NewRequestError(statusCode, string(respData))
+	*opt.statusCode = response.StatusCode
+	if !opt.codeJudger(*opt.statusCode) {
+		return NewRequestError(*opt.statusCode, string(respData))
 	}
 	if resp != nil {
 		switch v := resp.(type) {

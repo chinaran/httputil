@@ -110,13 +110,14 @@ func TestHttpRequest(t *testing.T) {
 			if tt.give.timeout > 0 {
 				d = tt.give.timeout
 			}
+			var statusCode int
 			err := httpRequest(context.TODO(), tt.give.method, ts.URL, tt.give.req,
 				tt.give.resp, WithLogTimeCost(t.Logf), WithTimeout(d), WithClient(&http.Client{}),
 				WithMarshal(json.Marshal), WithUnmarshal(json.Unmarshal),
 				WithHeader(map[string]string{
 					"Accept":       "application/json",
 					"Content-Type": "application/json;charset=UTF-8",
-				}), WithStatusCodeJudge(defaultCodeJudger))
+				}), WithStatusCodeJudge(defaultCodeJudger), StoreStatusCode(&statusCode))
 			if tt.wantErr {
 				t.Logf("err: %+v\n", err)
 				code, ok := GetErrorCode(err)
@@ -129,6 +130,7 @@ func TestHttpRequest(t *testing.T) {
 				}
 			} else {
 				require.NoError(t, err)
+				assert.Equal(t, statusCode, tt.wantCode)
 				switch v := tt.give.resp.(type) {
 				case *map[string]string:
 					assert.Equal(t, (*v)["foo"], "bar")
