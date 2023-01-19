@@ -14,10 +14,8 @@ import (
 	"time"
 )
 
-var (
-	// default logger
-	logger = log.New(os.Stdout, "INFO ", log.Ldate|log.Ltime)
-)
+// default logger
+var logger = log.New(os.Stdout, "INFO ", log.Ldate|log.Ltime)
 
 // RequestError httputil request error
 type RequestError struct {
