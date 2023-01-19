@@ -4,7 +4,8 @@ import (
 	"net/http"
 )
 
-// WithTraceHeaders forward trace headers
+// ForwardHeaders forward trace headers
+// refer: https://github.com/istio/istio/blob/31692397b17c1ad89c4227fd5b1696cba4027978/samples/bookinfo/src/productpage/productpage.py#L162
 func ForwardHeaders(headers http.Header) map[string]string {
 	forwardHeaders := make(map[string]string)
 	incommingHeaders := []string{

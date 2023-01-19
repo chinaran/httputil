@@ -3,7 +3,7 @@ package httputil
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -25,21 +25,24 @@ func TestHttpRequest(t *testing.T) {
 	commonStr := `{"foo": "bar"}`
 	commonData := []byte(commonStr)
 	commonReq := make(map[string]string)
-	json.Unmarshal(commonData, &commonReq)
+	json.Unmarshal(commonData, &commonReq) //nolint:errcheck
+	b3Header := make(http.Header)
+	b3Header.Set("x-b3-traceid", "abc")
+
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		reqBody, err := ioutil.ReadAll(r.Body)
+		reqBody, err := io.ReadAll(r.Body)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write(reqBody)
+			w.Write(reqBody) //nolint:errcheck
 			return
 		}
 		switch r.Method {
 		case http.MethodGet:
 			w.WriteHeader(http.StatusOK)
-			w.Write(commonData)
+			w.Write(commonData) //nolint:errcheck
 		case http.MethodPost:
 			w.WriteHeader(http.StatusOK)
-			w.Write(reqBody)
+			w.Write(reqBody) //nolint:errcheck
 		case http.MethodPut:
 			w.WriteHeader(http.StatusInternalServerError)
 		case http.MethodPatch:
@@ -47,7 +50,7 @@ func TestHttpRequest(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		case http.MethodDelete:
 			w.WriteHeader(http.StatusOK)
-			w.Write(commonData)
+			w.Write(commonData) //nolint:errcheck
 		default:
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -117,7 +120,10 @@ func TestHttpRequest(t *testing.T) {
 				WithHeader(map[string]string{
 					"Accept":       "application/json",
 					"Content-Type": "application/json;charset=UTF-8",
-				}), WithStatusCodeJudge(defaultCodeJudger), StoreStatusCode(&statusCode))
+				}),
+				WithTraceHeaders(b3Header),
+				WithStatusCodeJudge(defaultCodeJudger),
+				StoreStatusCode(&statusCode))
 			if tt.wantErr {
 				t.Logf("err: %+v\n", err)
 				code, ok := GetErrorCode(err)

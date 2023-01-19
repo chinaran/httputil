@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -114,6 +113,26 @@ func WithHeader(header map[string]string) ReqOptionFunc {
 			return nil
 		}
 		opt.header = header
+		return nil
+	}
+}
+
+// WithTraceHeaders append trace headers
+// NOTE:
+// 1. This should only be used in the demo project.
+// 2. If the WithHeader method is used, it should be used after it.
+func WithTraceHeaders(headers http.Header) ReqOptionFunc {
+	return func(opt *reqOptions) error {
+		if opt == nil || headers == nil {
+			return nil
+		}
+		if opt.header == nil {
+			opt.header = make(map[string]string)
+		}
+		m := ForwardHeaders(headers)
+		for k, v := range m {
+			opt.header[k] = v
+		}
 		return nil
 	}
 }
@@ -290,7 +309,7 @@ func httpRequest(ctx context.Context, method, addr string, req, resp interface{}
 	}
 	defer response.Body.Close()
 
-	respData, err := ioutil.ReadAll(response.Body)
+	respData, err := io.ReadAll(response.Body)
 	if err != nil {
 		return err
 	}
