@@ -114,7 +114,7 @@ func TestHttpRequest(t *testing.T) {
 				d = tt.give.timeout
 			}
 			var statusCode int
-			err := httpRequest(context.TODO(), tt.give.method, ts.URL,
+			err := HttpRequest(context.TODO(), tt.give.method, ts.URL,
 				tt.give.req, tt.give.resp,
 				WithLogTimeCost(t.Logf),
 				WithTimeout(d),

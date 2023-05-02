@@ -219,27 +219,27 @@ var defaultReqOption = reqOptions{
 
 // Get http request
 func Get(ctx context.Context, url string, resp interface{}, opts ...ReqOptionFunc) error {
-	return httpRequest(ctx, http.MethodGet, url, nil, resp, opts...)
+	return HttpRequest(ctx, http.MethodGet, url, nil, resp, opts...)
 }
 
 // Post http request
 func Post(ctx context.Context, url string, req, resp interface{}, opts ...ReqOptionFunc) error {
-	return httpRequest(ctx, http.MethodPost, url, req, resp, opts...)
+	return HttpRequest(ctx, http.MethodPost, url, req, resp, opts...)
 }
 
 // Put http request
 func Put(ctx context.Context, url string, req, resp interface{}, opts ...ReqOptionFunc) error {
-	return httpRequest(ctx, http.MethodPut, url, req, resp, opts...)
+	return HttpRequest(ctx, http.MethodPut, url, req, resp, opts...)
 }
 
 // Patch http request
 func Patch(ctx context.Context, url string, req, resp interface{}, opts ...ReqOptionFunc) error {
-	return httpRequest(ctx, http.MethodPatch, url, req, resp, opts...)
+	return HttpRequest(ctx, http.MethodPatch, url, req, resp, opts...)
 }
 
 // Delete http request
 func Delete(ctx context.Context, url string, resp interface{}, opts ...ReqOptionFunc) error {
-	return httpRequest(ctx, http.MethodDelete, url, nil, resp, opts...)
+	return HttpRequest(ctx, http.MethodDelete, url, nil, resp, opts...)
 }
 
 // gin style log
@@ -249,7 +249,7 @@ func requestLog(printfer PrintfFunc, statusCode int, cost time.Duration, method,
 
 // http request
 // req, resp are point type
-func httpRequest(ctx context.Context, method, addr string, req, resp interface{}, opts ...ReqOptionFunc) error {
+func HttpRequest(ctx context.Context, method, addr string, req, resp interface{}, opts ...ReqOptionFunc) error {
 	u, err := url.Parse(addr)
 	if err != nil {
 		return fmt.Errorf("bad request url: s%s", err)
