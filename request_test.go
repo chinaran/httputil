@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 type Give struct {
@@ -117,6 +116,7 @@ func TestHttpRequest(t *testing.T) {
 			err := HttpRequest(context.TODO(), tt.give.method, ts.URL,
 				tt.give.req, tt.give.resp,
 				WithLogTimeCost(t.Logf),
+				WithDumpRequest(true, true),
 				WithTimeout(d),
 				WithClient(&http.Client{}),
 				WithMarshal(json.Marshal),
@@ -139,7 +139,7 @@ func TestHttpRequest(t *testing.T) {
 					}
 				}
 			} else {
-				require.NoError(t, err)
+				assert.NoError(t, err)
 				assert.Equal(t, statusCode, tt.wantCode)
 				switch v := tt.give.resp.(type) {
 				case *map[string]string:

@@ -68,15 +68,17 @@ type UnmarshalFunc func(data []byte, v interface{}) error
 
 // request options
 type reqOptions struct {
-	httpClient  *http.Client
-	timeout     time.Duration
-	header      map[string]string
-	marshaler   MarshalFunc
-	unmarshaler UnmarshalFunc
-	logTimeCost bool
-	printfer    PrintfFunc
-	codeJudger  StatusCodeJudgeFunc
-	statusCode  *int
+	httpClient   *http.Client
+	timeout      time.Duration
+	header       map[string]string
+	marshaler    MarshalFunc
+	unmarshaler  UnmarshalFunc
+	logTimeCost  bool
+	dumpRequest  bool
+	dumpResponse bool
+	printfer     PrintfFunc
+	codeJudger   StatusCodeJudgeFunc
+	statusCode   *int
 }
 
 // ReqOptionFunc request option function
@@ -171,6 +173,18 @@ func WithLogTimeCost(printfer ...PrintfFunc) ReqOptionFunc {
 	}
 }
 
+// WithDumpRequest default: false, false
+func WithDumpRequest(dumpRequest, dumpResponse bool) ReqOptionFunc {
+	return func(opt *reqOptions) error {
+		if opt == nil {
+			return nil
+		}
+		opt.dumpRequest = dumpRequest
+		opt.dumpResponse = dumpResponse
+		return nil
+	}
+}
+
 // WithStatusCodeJudge default: defaultCodeJudger
 func WithStatusCodeJudge(codeJudger StatusCodeJudgeFunc) ReqOptionFunc {
 	return func(opt *reqOptions) error {
@@ -209,12 +223,14 @@ var defaultReqOption = reqOptions{
 		"Accept":       "application/json",
 		"Content-Type": "application/json;charset=UTF-8",
 	},
-	marshaler:   json.Marshal,
-	unmarshaler: json.Unmarshal,
-	logTimeCost: false,
-	printfer:    logger.Printf,
-	codeJudger:  defaultCodeJudger,
-	statusCode:  new(int),
+	marshaler:    json.Marshal,
+	unmarshaler:  json.Unmarshal,
+	logTimeCost:  false,
+	dumpRequest:  false,
+	dumpResponse: false,
+	printfer:     logger.Printf,
+	codeJudger:   defaultCodeJudger,
+	statusCode:   new(int),
 }
 
 // Get http request
@@ -301,11 +317,19 @@ func HttpRequest(ctx context.Context, method, addr string, req, resp interface{}
 		request.Header.Set(k, v)
 	}
 
+	if opt.dumpRequest {
+		CurlLikeDumpRequest(request)
+	}
+
 	response, err := opt.httpClient.Do(request)
 	if err != nil {
 		return err
 	}
 	defer response.Body.Close()
+
+	if opt.dumpResponse {
+		CurlLikeDumpResponse(response)
+	}
 
 	respData, err := io.ReadAll(response.Body)
 	if err != nil {
