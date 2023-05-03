@@ -130,6 +130,7 @@ func TestHttpRequest(t *testing.T) {
 				StoreStatusCode(&statusCode))
 			if tt.wantErr {
 				t.Logf("err: %+v\n", err)
+				t.Logf("err message: %s\n", GetErrorMessage(err))
 				code, ok := GetErrorCode(err)
 				if ok {
 					assert.Equal(t, code, tt.wantCode)
