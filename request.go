@@ -177,22 +177,24 @@ func StoreStatusCode(statusCode *int) ReqOptionFunc {
 	}
 }
 
-// default option for each request
-var defaultReqOption = reqOptions{
-	httpClient: &http.Client{},
-	timeout:    30 * time.Second,
-	header: map[string]string{
-		"Accept":       "application/json",
-		"Content-Type": "application/json;charset=UTF-8",
-	},
-	marshaler:    json.Marshal,
-	unmarshaler:  json.Unmarshal,
-	logTimeCost:  false,
-	dumpRequest:  false,
-	dumpResponse: false,
-	printfer:     logger.Printf,
-	codeJudger:   defaultCodeJudger,
-	statusCode:   new(int),
+// new default option for each request
+func newDefaultReqOption() *reqOptions {
+	return &reqOptions{
+		httpClient: &http.Client{},
+		timeout:    30 * time.Second,
+		header: map[string]string{
+			"Accept":       "application/json",
+			"Content-Type": "application/json;charset=UTF-8",
+		},
+		marshaler:    json.Marshal,
+		unmarshaler:  json.Unmarshal,
+		logTimeCost:  false,
+		dumpRequest:  false,
+		dumpResponse: false,
+		printfer:     logger.Printf,
+		codeJudger:   defaultCodeJudger,
+		statusCode:   new(int),
+	}
 }
 
 // Get http request
@@ -237,11 +239,11 @@ func HttpRequest(ctx context.Context, method, addr string, req, resp interface{}
 	}
 
 	var (
-		opt     = defaultReqOption
+		opt     = newDefaultReqOption()
 		reqBody io.Reader
 	)
 	for _, optFunc := range opts {
-		if err := optFunc(&opt); err != nil {
+		if err := optFunc(opt); err != nil {
 			return err
 		}
 	}
